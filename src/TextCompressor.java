@@ -30,14 +30,25 @@
 public class TextCompressor {
 
     private static void compress() {
-
         // TODO: Complete the compress() method
-
+        /*
+        read data into String text
+        index = 0
+        while index < text.length:
+            prefix = longest coded word that matches text @ index
+            write out that code
+            if possible, look ahead to the next character
+            append that character to prefix
+            associate prefix with the next code (if available)
+            index += prefix.length
+        write out EOF and close
+         */
+        TST tst = new TST();
+        String text = BinaryStdIn.readString();
         BinaryStdOut.close();
     }
 
     private static void expand() {
-
         // TODO: Complete the expand() method
 
         BinaryStdOut.close();
