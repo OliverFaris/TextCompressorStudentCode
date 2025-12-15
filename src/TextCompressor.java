@@ -28,28 +28,83 @@
  *  @author Zach Blick, Oliver Faris
  */
 public class TextCompressor {
+    private static final int EOF = 128;
 
     private static void compress() {
-        // TODO: Complete the compress() method
-        /*
-        read data into String text
-        index = 0
-        while index < text.length:
-            prefix = longest coded word that matches text @ index
-            write out that code
-            if possible, look ahead to the next character
-            append that character to prefix
-            associate prefix with the next code (if available)
-            index += prefix.length
-        write out EOF and close
-         */
         TST tst = new TST();
         String text = BinaryStdIn.readString();
+        int index = 0;
+        String prefix = "";
+        int code;
+        int prefixNum = 0x81;
+        char nextChar;
+
+        String str;
+        // Fill tst with existing values
+        for (int i = 0; i < 128; i++) {
+            str = String.valueOf(((char) i));
+            tst.insert(str, i);
+        }
+
+        while (index < text.length()) {
+            prefix = tst.getLongestPrefix(text.substring(index));
+
+            // Write out the code
+            code = tst.lookup(prefix);
+            BinaryStdOut.write(code, 8);
+
+            if (index < text.length()-prefix.length()-1 && prefixNum < 255) {
+                // Look ahead to add the next char to the prefix to add to the TST
+                nextChar = text.charAt(index + prefix.length());
+                String prefixCopy = prefix + nextChar;
+                tst.insert(prefixCopy, prefixNum);
+                prefixNum++;
+            }
+            index += prefix.length();
+
+        }
+        BinaryStdOut.write(EOF, 8);
         BinaryStdOut.close();
     }
 
     private static void expand() {
-        // TODO: Complete the expand() method
+        String[] prefixes = new String[256];
+        int newCodeNum = 129;
+        // Add existing values into map
+        for (int i = 0; i < 128; i++) {
+            prefixes[i] = String.valueOf(((char) i));
+        }
+
+        int code = BinaryStdIn.readInt(8);
+        int lookAheadCode = BinaryStdIn.readInt(8);
+        String codeStr;
+        String lookAheadStr;
+
+        while (lookAheadCode != EOF) {
+            codeStr = prefixes[code];
+
+            // Edge case where lookAheadCode is null
+            if (lookAheadCode == newCodeNum)
+                lookAheadStr = codeStr + codeStr.charAt(0);
+            else {
+                // Normal
+                lookAheadStr = prefixes[lookAheadCode];
+            }
+
+            BinaryStdOut.write(codeStr);
+
+            // Add new codes to map
+            if (newCodeNum < 255) {
+                prefixes[newCodeNum] = codeStr + lookAheadStr.charAt(0);
+                newCodeNum++;
+            }
+
+            // Go "forward"
+            code = lookAheadCode;
+            lookAheadCode = BinaryStdIn.readInt(8);
+        }
+        // Write the last character
+        BinaryStdOut.write(prefixes[code]);
 
         BinaryStdOut.close();
     }
